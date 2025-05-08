@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fraud Detection System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="header">Transaction Fraud Analysis</h1>
+        <div class="card">
+            <div class="card-body">
+                <form id="transactionForm" class="transaction-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Transaction Frequency (per hour):</label>
+                            <input type="number" name="Sent tnx" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Average Time Between Transactions (min):</label>
+                            <input type="number" name="Avg min between sent tnx" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Total ETH Sent:</label>
+                            <input type="number" name="total Ether sent" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Average Transaction Value:</label>
+                            <input type="number" name="avg val sent" step="0.01" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="analyze-btn">
+                        <i class="fas fa-search"></i> Analyze Transaction
+                    </button>
+                </form>
+                
+                <div id="results" class="results-card hidden">
+                    <h3>Analysis Results</h3>
+                    <div class="result-content">
+                        <div class="confidence-gauge">
+                            <div class="gauge-meter"></div>
+                            <div class="gauge-label">Risk Probability</div>
+                        </div>
+                        <div class="result-details">
+                            <div class="result-text alert"></div>
+                            <div class="confidence">
+                                Confidence: <span class="confidence-value"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+/* Custom styles for the FL Fraud Detection Dashboard */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    border: none;
+}
+
+.card-header {
+    border-radius: 8px 8px 0 0 !important;
+    font-weight: 600;
+}
+
+.client-card {
+    transition: transform 0.2s;
+}
+
+.client-card:hover {
+    transform: translateY(-5px);
+}
+
+.client-card .card-header {
+    background-color: #6c757d;
+    color: white;
+}
+
+#performance-chart {
+    width: 100%;
+    min-height: 400px;
+}
+
+.fraud-ratio {
+    font-weight: bold;
+    color: #dc3545;
+}
+
+.accuracy {
+    font-weight: bold;
+    color: #198754;
+}
+
+#prediction-result .alert {
+    border-radius: 8px;
+}
+
+#prediction-result .alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: #dc3545;
+}
+
+#prediction-result .alert-success {
+    background-color: rgba(25, 135, 84, 0.1);
+    border-color: #198754;
+}
+
+table th {
+    background-color: #f1f1f1;
+}
+
+.fraud-flag-true {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.fraud-flag-false {
+    color: #198754;
+}
+
+#simulation-status {
+    font-weight: bold;
+}
+
+.running {
+    color: #198754;
+}
+
+.stopped {
+    color: #dc3545;
+}

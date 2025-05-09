@@ -1,0 +1,35 @@
+<class 'pandas.core.frame.DataFrame'>
+Index: 4117 entries, 2443 to 655
+Data columns (total 28 columns):
+ #   Column                                                Non-Null Count  Dtype  
+---  ------                                                --------------  -----  
+ 0   Avg min between sent tnx                              4117 non-null   float64
+ 1   Avg min between received tnx                          4117 non-null   float64
+ 2   Time Diff between first and last (Mins)               4117 non-null   float64
+ 3   Sent tnx                                              4117 non-null   int64  
+ 4   Received Tnx                                          4117 non-null   int64  
+ 5   Number of Created Contracts                           4117 non-null   int64  
+ 6   Unique Received From Addresses                        4117 non-null   int64  
+ 7   Unique Sent To Addresses                              4117 non-null   int64  
+ 8   min value received                                    4117 non-null   float64
+ 9   max value received                                    4117 non-null   float64
+ 10  avg val received                                      4117 non-null   float64
+ 11  min val sent                                          4117 non-null   float64
+ 12  max val sent                                          4117 non-null   float64
+ 13  avg val sent                                          4117 non-null   float64
+ 14  total transactions (including tnx to create contract  4117 non-null   int64  
+ 15  total Ether sent                                      4117 non-null   float64
+ 16  total ether received                                  4117 non-null   float64
+ 17  total ether balance                                   4117 non-null   float64
+ 18  Total ERC20 tnxs                                      4117 non-null   float64
+ 19  ERC20 total Ether received                            4117 non-null   float64
+ 20  ERC20 total ether sent                                4117 non-null   float64
+ 21  ERC20 total Ether sent contract                       4117 non-null   float64
+ 22  ERC20 uniq sent addr                                  4117 non-null   float64
+ 23  ERC20 uniq rec addr                                   4117 non-null   float64
+ 24  ERC20 uniq rec contract addr                          4117 non-null   float64
+ 25  ERC20 min val rec                                     4117 non-null   float64
+ 26  ERC20 uniq sent token name                            4117 non-null   float64
+ 27  FLAG                                                  4117 non-null   int64  
+dtypes: float64(21), int64(7)
+memory usage: 932.8 KB

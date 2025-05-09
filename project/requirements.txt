@@ -1,0 +1,11 @@
+pandas
+numpy
+scikit-learn
+torch
+torchvision
+torchaudio
+flwr[simulation]==1.7.0 
+Flask==2.2.2 
+plotly==5.10.0
+requests 
+matplotlib

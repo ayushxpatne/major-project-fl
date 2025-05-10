@@ -1,35 +1,56 @@
 <class 'pandas.core.frame.DataFrame'>
-Index: 823 entries, 1226 to 718
-Data columns (total 28 columns):
+Index: 1351 entries, 5148 to 5904
+Data columns (total 49 columns):
  #   Column                                                Non-Null Count  Dtype  
 ---  ------                                                --------------  -----  
- 0   Avg min between sent tnx                              823 non-null    float64
- 1   Avg min between received tnx                          823 non-null    float64
- 2   Time Diff between first and last (Mins)               823 non-null    float64
- 3   Sent tnx                                              823 non-null    int64  
- 4   Received Tnx                                          823 non-null    int64  
- 5   Number of Created Contracts                           823 non-null    int64  
- 6   Unique Received From Addresses                        823 non-null    int64  
- 7   Unique Sent To Addresses                              823 non-null    int64  
- 8   min value received                                    823 non-null    float64
- 9   max value received                                    823 non-null    float64
- 10  avg val received                                      823 non-null    float64
- 11  min val sent                                          823 non-null    float64
- 12  max val sent                                          823 non-null    float64
- 13  avg val sent                                          823 non-null    float64
- 14  total transactions (including tnx to create contract  823 non-null    int64  
- 15  total Ether sent                                      823 non-null    float64
- 16  total ether received                                  823 non-null    float64
- 17  total ether balance                                   823 non-null    float64
- 18  Total ERC20 tnxs                                      823 non-null    float64
- 19  ERC20 total Ether received                            823 non-null    float64
- 20  ERC20 total ether sent                                823 non-null    float64
- 21  ERC20 total Ether sent contract                       823 non-null    float64
- 22  ERC20 uniq sent addr                                  823 non-null    float64
- 23  ERC20 uniq rec addr                                   823 non-null    float64
- 24  ERC20 uniq rec contract addr                          823 non-null    float64
- 25  ERC20 min val rec                                     823 non-null    float64
- 26  ERC20 uniq sent token name                            823 non-null    float64
- 27  FLAG                                                  823 non-null    int64  
-dtypes: float64(21), int64(7)
-memory usage: 186.5 KB
+ 0   Unnamed__0                                            1351 non-null   float64
+ 1   Avg_min_between_sent_tnx                              1351 non-null   float64
+ 2   Avg_min_between_received_tnx                          1351 non-null   float64
+ 3   Time_Diff_between_first_and_last__Mins_               1351 non-null   float64
+ 4   Sent_tnx                                              1351 non-null   float64
+ 5   Received_Tnx                                          1351 non-null   float64
+ 6   Number_of_Created_Contracts                           1351 non-null   float64
+ 7   Unique_Received_From_Addresses                        1351 non-null   float64
+ 8   Unique_Sent_To_Addresses                              1351 non-null   float64
+ 9   min_value_received                                    1351 non-null   float64
+ 10  max_value_received_                                   1351 non-null   float64
+ 11  avg_val_received                                      1351 non-null   float64
+ 12  min_val_sent                                          1351 non-null   float64
+ 13  max_val_sent                                          1351 non-null   float64
+ 14  avg_val_sent                                          1351 non-null   float64
+ 15  min_value_sent_to_contract                            1351 non-null   float64
+ 16  max_val_sent_to_contract                              1351 non-null   float64
+ 17  avg_value_sent_to_contract                            1351 non-null   float64
+ 18  total_transactions__including_tnx_to_create_contract  1351 non-null   float64
+ 19  total_Ether_sent                                      1351 non-null   float64
+ 20  total_ether_received                                  1351 non-null   float64
+ 21  total_ether_sent_contracts                            1351 non-null   float64
+ 22  total_ether_balance                                   1351 non-null   float64
+ 23  _Total_ERC20_tnxs                                     1351 non-null   float64
+ 24  _ERC20_total_Ether_received                           1351 non-null   float64
+ 25  _ERC20_total_ether_sent                               1351 non-null   float64
+ 26  _ERC20_total_Ether_sent_contract                      1351 non-null   float64
+ 27  _ERC20_uniq_sent_addr                                 1351 non-null   float64
+ 28  _ERC20_uniq_rec_addr                                  1351 non-null   float64
+ 29  _ERC20_uniq_sent_addr_1                               1351 non-null   float64
+ 30  _ERC20_uniq_rec_contract_addr                         1351 non-null   float64
+ 31  _ERC20_avg_time_between_sent_tnx                      1351 non-null   float64
+ 32  _ERC20_avg_time_between_rec_tnx                       1351 non-null   float64
+ 33  _ERC20_avg_time_between_rec_2_tnx                     1351 non-null   float64
+ 34  _ERC20_avg_time_between_contract_tnx                  1351 non-null   float64
+ 35  _ERC20_min_val_rec                                    1351 non-null   float64
+ 36  _ERC20_max_val_rec                                    1351 non-null   float64
+ 37  _ERC20_avg_val_rec                                    1351 non-null   float64
+ 38  _ERC20_min_val_sent                                   1351 non-null   float64
+ 39  _ERC20_max_val_sent                                   1351 non-null   float64
+ 40  _ERC20_avg_val_sent                                   1351 non-null   float64
+ 41  _ERC20_min_val_sent_contract                          1351 non-null   float64
+ 42  _ERC20_max_val_sent_contract                          1351 non-null   float64
+ 43  _ERC20_avg_val_sent_contract                          1351 non-null   float64
+ 44  _ERC20_uniq_sent_token_name                           1351 non-null   float64
+ 45  _ERC20_uniq_rec_token_name                            1351 non-null   float64
+ 46  _ERC20_most_sent_token_type                           1351 non-null   float64
+ 47  _ERC20_most_rec_token_type                            1351 non-null   float64
+ 48  FLAG                                                  1351 non-null   int64  
+dtypes: float64(48), int64(1)
+memory usage: 527.7 KB

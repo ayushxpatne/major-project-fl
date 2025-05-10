@@ -23,6 +23,14 @@ if [ ! -f "data/simulated_transactions.csv" ]; then
     $PYTHON scripts/simulate_tx.py
 fi
 
+# --- ADD THIS SECTION ---
+# Train and evaluate the centralized model, and save its metrics
+# This must run before the server starts so the server can load its metrics
+echo "Training and evaluating centralized model (and saving metrics)..."
+# Train and evaluating centralized model (and saving metrics)...
+$PYTHON scripts/evaluate.py
+# --- END ADDITION ---
+
 # Start FL server in background
 echo "Starting FL server..."
 $PYTHON -m fl_system.server &
@@ -43,21 +51,21 @@ CLIENT3_PID=$!
 # Wait for clients to initialize
 sleep 2
 
-# Launch Flask dashboard
-echo "Starting Flask dashboard..."
-$PYTHON app/app.py
+# Launch Flask dashboard (uncomment if you want to use it)
+# echo "Starting Flask dashboard..."
+# $PYTHON app/app.py
 
-# # Cleanup function
-# cleanup() {
-#     echo "Shutting down..."
-#     kill $SERVER_PID $CLIENT1_PID $CLIENT2_PID $CLIENT3_PID
-#     # Deactivate virtual environment
-#     deactivate
-#     exit 0
-# }
+# Cleanup function
+cleanup() {
+    echo "Shutting down..."
+    kill $SERVER_PID $CLIENT1_PID $CLIENT2_PID $CLIENT3_PID
+    # Deactivate virtual environment
+    deactivate
+    exit 0
+}
 
-# # Set up trap for cleanup
-# trap cleanup INT TERM
+# Set up trap for cleanup
+trap cleanup INT TERM
 
-# # Wait for Flask to exit
-# wait
+# Keep the script running until interrupted
+wait

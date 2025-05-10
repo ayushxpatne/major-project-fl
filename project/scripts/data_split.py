@@ -14,9 +14,9 @@ NUM_CLIENTS = 3
 
 # Client fraud ratios configuration
 CLIENT_FRAUD_CONFIG = {
-    0: {'fraud_ratio': 0.05, 'name': 'client_1'},
-    1: {'fraud_ratio': 0.10, 'name': 'client_2'},
-    2: {'fraud_ratio': 0.20, 'name': 'client_3'}
+    0: {'fraud_ratio': 0.04, 'name': 'client_1'},
+    1: {'fraud_ratio': 0.06, 'name': 'client_2'},
+    2: {'fraud_ratio': 0.08, 'name': 'client_3'}
 }
 RANDOM_STATE = 42
 

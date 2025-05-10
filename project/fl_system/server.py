@@ -9,99 +9,174 @@ from sklearn.metrics import roc_auc_score, f1_score, precision_score, recall_sco
 import matplotlib.pyplot as plt
 from torch.utils.data import TensorDataset, DataLoader
 
-from .model import FraudDetectionNet, get_model_input_features # Relative import
-from .clients import load_client_data # To get a global test set for server-side evaluation
+from .model import FraudDetectionNet, get_model_input_features  # Relative import
 
-# Configuration
-NUM_ROUNDS = 10  # Reduced from 10 to prevent overfitting
-AGGREGATE_EVERY_N_ROUNDS = 3 # Server aggregates weights every 3 rounds (as per req, but FedAvg usually aggregates each round)
-                            # Flower's FedAvg aggregates every round by default.
-                            # To aggregate every 3 rounds, we'd need a custom strategy or adjust client participation.
-                            # For simplicity, FedAvg will aggregate each round. The "every 3 rounds" might refer to something else.
-                            # Let's assume FedAvg default behavior (aggregate each round where clients participate).
-                            # The prompt "Aggregates weights every 3 rounds" might be a misunderstanding of FedAvg.
-                            # If it means server *evaluates* or *saves model* every 3 rounds, that's different.
-                            # For now, standard FedAvg.
-MIN_AVAILABLE_CLIENTS = 2 # Min clients for training round
-MIN_FIT_CLIENTS = 2       # Min clients to train in a round
-MIN_EVALUATE_CLIENTS = 2  # Min clients for evaluation
-GLOBAL_MODEL_PATH = '/Users/ayushpatne/Developer/FL_Major/project/global_model.pth'
-RESULTS_DIR = '/Users/ayushpatne/Developer/FL_Major/project/results/'
-DATA_DIR = '/Users/ayushpatne/Developer/FL_Major/project/data/'
+# Add this constant
 
+
+
+# Configuration - Use relative paths for better portability
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+RESULTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'results')
+GLOBAL_MODEL_PATH = os.path.join(BASE_DIR, 'global_model.pth')
+CENTRALIZED_MODEL_PATH = os.path.join(BASE_DIR, 'centralized_model.pth')
+
+# FL parameters
+NUM_ROUNDS = 10
+AGGREGATE_EVERY_N_ROUNDS = 3  # This is for metrics evaluation and model saving, not aggregation of weights
+MIN_AVAILABLE_CLIENTS = 2
+MIN_FIT_CLIENTS = 2
+MIN_EVALUATE_CLIENTS = 2
 
 # Store metrics for plotting
-history_fl = {'round': [], 'auc': [], 'f1': [], 'loss': [], 'accuracy': []}
-history_centralized = {'auc': 0, 'f1': 0, 'precision': 0, 'recall': 0} # Placeholder
+history_fl = {'round': [], 'auc': [], 'f1': [], 'loss': [], 'accuracy': [], 'precision': [], 'recall': []}
+
+def load_test_data():
+    """Load the global test dataset for evaluation"""
+    try:
+        test_df = pd.read_csv(os.path.join(DATA_DIR, "global_test_centralized.csv"))
+        X_test = test_df.drop(columns=['FLAG']).values.astype(np.float32)
+        y_test = test_df['FLAG'].values.astype(np.float32).reshape(-1, 1)
+        
+        return X_test, y_test, torch.tensor(X_test, dtype=torch.float32), torch.tensor(y_test, dtype=torch.float32)
+    except FileNotFoundError:
+        print("Global test set not found. Using client 1 test data as fallback.")
+        try:
+            test_df = pd.read_csv(os.path.join(DATA_DIR, "client_1_test.csv"))
+            X_test = test_df.drop(columns=['FLAG']).values.astype(np.float32)
+            y_test = test_df['FLAG'].values.astype(np.float32).reshape(-1, 1)
+            
+            return X_test, y_test, torch.tensor(X_test, dtype=torch.float32), torch.tensor(y_test, dtype=torch.float32)
+        except FileNotFoundError:
+            raise FileNotFoundError("No test data found. Please run data_split.py first.")
+
+def load_centralized_model_metrics():
+    """Load metrics from the centralized model for comparison."""
+    try:
+        metrics_path = os.path.join(RESULTS_DIR, 'centralized_metrics.joblib')
+        if os.path.exists(metrics_path):
+            metrics = joblib.load(metrics_path)
+            print("Loaded centralized model metrics for comparison:", metrics)
+            return metrics
+        else:
+            print("Centralized model metrics not found.")
+            
+            # If centralized_model.pth exists but metrics don't, evaluate it
+            if os.path.exists(CENTRALIZED_MODEL_PATH):
+                print("Centralized model found. Evaluating to get metrics...")
+                num_features = get_model_input_features()
+                model = FraudDetectionNet(num_features)
+                model.load_state_dict(torch.load(CENTRALIZED_MODEL_PATH))
+                model.eval()
+                
+                # Load test data
+                X_test, y_test, X_tensor, y_tensor = load_test_data()
+                
+                # Evaluate
+                with torch.no_grad():
+                    outputs = model(X_tensor)
+                    loss = torch.nn.functional.binary_cross_entropy(outputs, y_tensor).item()
+                    preds = (outputs > 0.5).float()
+                    accuracy = ((preds == y_tensor).sum().item()) / len(y_tensor)
+                    
+                    # Convert to numpy for sklearn metrics
+                    y_true = y_tensor.numpy().flatten()
+                    y_pred = preds.numpy().flatten()
+                    y_prob = outputs.numpy().flatten()
+                    
+                    auc = roc_auc_score(y_true, y_prob)
+                    f1 = f1_score(y_true, y_pred)
+                    precision = precision_score(y_true, y_pred)
+                    recall = recall_score(y_true, y_pred)
+                    
+                    metrics = {
+                        'auc': float(auc),
+                        'f1': float(f1),
+                        'precision': float(precision),
+                        'recall': float(recall),
+                        'accuracy': float(accuracy),
+                        'loss': float(loss)
+                    }
+                    
+                    # Save metrics
+                    if not os.path.exists(RESULTS_DIR):
+                        os.makedirs(RESULTS_DIR)
+                    joblib.dump(metrics, metrics_path)
+                    print(f"Centralized model evaluated and metrics saved: {metrics}")
+                    return metrics
+    except Exception as e:
+        print(f"Error loading centralized metrics: {e}")
+    
+    # Return default values if no metrics found
+    return {
+        'auc': 0.0,
+        'f1': 0.0,
+        'precision': 0.0,
+        'recall': 0.0,
+        'accuracy': 0.0,
+        'loss': 0.0
+    }
 
 def get_evaluate_fn(model_class, num_input_features):
     """Return an evaluation function for server-side evaluation."""
     
-    # Load a global test set (or a portion of client data for simplicity if global_test is not available)
-    # Here we use the 'global_test_centralized.csv' created by data_split.py
-    try:
-        test_df = pd.read_csv(os.path.join(DATA_DIR, "global_test_centralized.csv"))
-        X_test_global = test_df.drop(columns=['FLAG']).values.astype(np.float32)
-        y_test_global = test_df['FLAG'].values.astype(np.float32).reshape(-1, 1)
-        
-        test_dataset = TensorDataset(torch.from_numpy(X_test_global), torch.from_numpy(y_test_global))
-        testloader = DataLoader(test_dataset, batch_size=32)
-        print(f"Loaded global test set for server evaluation: {len(test_df)} samples.")
-    except FileNotFoundError:
-        print("Global test set not found. Using client 1 test data as fallback for server evaluation.")
-        # Fallback to client 1 test data if global test set is not available
-        _, testloader = load_client_data(client_id=1, batch_size=32)
+    # Load test data upfront to avoid reloading during each evaluation
+    X_test, y_test, X_tensor, y_tensor = load_test_data()
+    print(f"Loaded test data for server evaluation: {len(X_test)} samples")
     
-    # The evaluation function - needs to accept 3 parameters
-    def evaluate(server_round, parameters, config):  # Modified parameter list
+    # Load centralized model metrics for comparison
+    centralized_metrics = load_centralized_model_metrics()
+    
+    # The evaluation function
+    def evaluate(server_round, parameters, config):
         # Initialize model with the latest weights
         model = model_class(num_input_features)
-        params_dict = zip(model.state_dict().keys(), parameters)  # Use parameters arg
+        params_dict = zip(model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         model.load_state_dict(state_dict, strict=True)
         model.eval()
         
         # Evaluate on the test set
-        loss = 0.0
-        correct = 0
-        total = 0
-        y_true = []
-        y_pred = []
-        y_prob = []
-        
         with torch.no_grad():
-            for data, target in testloader:
-                outputs = model(data)
-                loss += torch.nn.functional.binary_cross_entropy(outputs, target).item()
-                
-                predicted = (outputs > 0.5).float()
-                total += target.size(0)
-                correct += (predicted == target).sum().item()
-                
-                y_true.extend(target.cpu().numpy())
-                y_pred.extend(predicted.cpu().numpy())
-                y_prob.extend(outputs.cpu().numpy())
-        
-        # Calculate metrics
-        accuracy = correct / total
-        auc = roc_auc_score(y_true, y_prob)
-        f1 = f1_score(y_true, y_pred)
-        precision = precision_score(y_true, y_pred)
-        recall = recall_score(y_true, y_pred)
+            outputs = model(X_tensor)
+            loss = torch.nn.functional.binary_cross_entropy(outputs, y_tensor).item()
+            preds = (outputs > 0.5).float()
+            accuracy = ((preds == y_tensor).sum().item()) / len(y_tensor)
+            
+            # Convert to numpy for sklearn metrics
+            y_true = y_tensor.numpy().flatten()
+            y_pred = preds.numpy().flatten()
+            y_prob = outputs.numpy().flatten()
+            
+            try:
+                auc = roc_auc_score(y_true, y_prob)
+            except ValueError:
+                auc = 0.5
+                print("Warning: AUC could not be computed due to single class or constant predictions.")
+            
+            f1 = f1_score(y_true, y_pred)
+            precision = precision_score(y_true, y_pred)
+            recall = recall_score(y_true, y_pred)
         
         # Update history for plotting
-        current_round = len(history_fl['round']) + 1
-        history_fl['round'].append(current_round)
+        history_fl['round'].append(server_round)
         history_fl['auc'].append(auc)
         history_fl['f1'].append(f1)
-        history_fl['loss'].append(loss / len(testloader))
+        history_fl['loss'].append(loss)
         history_fl['accuracy'].append(accuracy)
+        history_fl['precision'].append(precision)
+        history_fl['recall'].append(recall)
         
-        # Save model every AGGREGATE_EVERY_N_ROUNDS rounds
-        if current_round % AGGREGATE_EVERY_N_ROUNDS == 0 or current_round == NUM_ROUNDS:
+        print(f"\nRound {server_round} Evaluation Results:")
+        print(f"FL Model - Loss: {loss:.4f}, Accuracy: {accuracy:.4f}, AUC: {auc:.4f}, F1: {f1:.4f}")
+        print(f"Centralized - AUC: {centralized_metrics['auc']:.4f}, F1: {centralized_metrics['f1']:.4f}")
+        
+        # Save model periodically or at the end
+        if server_round % AGGREGATE_EVERY_N_ROUNDS == 0 or server_round == NUM_ROUNDS:
             # Save the global model
             torch.save(model.state_dict(), GLOBAL_MODEL_PATH)
-            print(f"Global model saved to {GLOBAL_MODEL_PATH} at round {current_round}")
+            print(f"Global model saved to {GLOBAL_MODEL_PATH} at round {server_round}")
             
             # Create plots for visualization
             if not os.path.exists(RESULTS_DIR):
@@ -112,7 +187,7 @@ def get_evaluate_fn(model_class, num_input_features):
             
             plt.subplot(2, 2, 1)
             plt.plot(history_fl['round'], history_fl['auc'], 'b-', label='FL Model')
-            plt.axhline(y=history_centralized['auc'], color='r', linestyle='-', label='Centralized')
+            plt.axhline(y=centralized_metrics['auc'], color='r', linestyle='-', label='Centralized')
             plt.title('AUC-ROC over Rounds')
             plt.xlabel('Round')
             plt.ylabel('AUC-ROC')
@@ -120,7 +195,7 @@ def get_evaluate_fn(model_class, num_input_features):
             
             plt.subplot(2, 2, 2)
             plt.plot(history_fl['round'], history_fl['f1'], 'b-', label='FL Model')
-            plt.axhline(y=history_centralized['f1'], color='r', linestyle='-', label='Centralized')
+            plt.axhline(y=centralized_metrics['f1'], color='r', linestyle='-', label='Centralized')
             plt.title('F1 Score over Rounds')
             plt.xlabel('Round')
             plt.ylabel('F1 Score')
@@ -142,32 +217,96 @@ def get_evaluate_fn(model_class, num_input_features):
             plt.savefig(os.path.join(RESULTS_DIR, 'comparison.png'))
             plt.close()
             
-            print(f"Evaluation plots saved to {os.path.join(RESULTS_DIR, 'comparison.png')}")
-        
-        return float(loss), {"accuracy": float(accuracy), "auc": float(auc), 
-                            "f1": float(f1), "precision": float(precision), "recall": float(recall)}
+            # Save metrics for external use
+            metrics_data = {
+                'round': history_fl['round'],
+                'auc': history_fl['auc'],
+                'f1': history_fl['f1'],
+                'loss': history_fl['loss'],
+                'accuracy': history_fl['accuracy'],
+                'precision': history_fl['precision'],
+                'recall': history_fl['recall']
+            }
+            
+            # Save as JSON for web access
+            import json
+            with open(os.path.join(RESULTS_DIR, 'fl_metrics.json'), 'w') as f:
+                json.dump(metrics_data, f)
+            
+            # Save last round metrics in joblib format
+            last_metrics = {
+                'auc': auc,
+                'f1': f1,
+                'precision': precision,
+                'recall': recall,
+                'accuracy': accuracy,
+                'loss': loss
+            }
+            joblib.dump(last_metrics, os.path.join(RESULTS_DIR, 'fl_metrics.joblib'))
+            
+            print(f"Evaluation plots and metrics saved at {RESULTS_DIR}")
+            
+        return float(loss), {
+            "accuracy": float(accuracy),
+            "auc": float(auc),
+            "f1": float(f1),
+            "precision": float(precision),
+            "recall": float(recall)
+        }
     
     return evaluate
 
-def load_centralized_model_metrics():
-    """Load metrics from the centralized model for comparison."""
-    try:
-        # Try to load metrics from a saved file
-        metrics = joblib.load(os.path.join(RESULTS_DIR, 'centralized_metrics.joblib'))
-        history_centralized.update(metrics)
-        print("Loaded centralized model metrics for comparison.")
-    except FileNotFoundError:
-        # If not available, use placeholder values
-        print("Centralized model metrics not found. Using placeholder values.")
-        # These will be updated if/when the centralized model is evaluated
+def plot_global_metrics(history_fl, results_dir):
+    """
+    Plots global FL metrics (AUC, F1, Loss, Accuracy, Precision, Recall) over rounds.
+    """
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+
+    metrics = ['auc', 'f1', 'loss', 'accuracy', 'precision', 'recall']
+    titles = {
+        'auc': 'AUC-ROC over Rounds (Global Model)',
+        'f1': 'F1 Score over Rounds (Global Model)',
+        'loss': 'Loss over Rounds (Global Model)',
+        'accuracy': 'Accuracy over Rounds (Global Model)',
+        'precision': 'Precision over Rounds (Global Model)',
+        'recall': 'Recall over Rounds (Global Model)'
+    }
+    filenames = {
+        'auc': 'global_auc_roc_over_rounds.png',
+        'f1': 'global_f1_score_over_rounds.png',
+        'loss': 'global_loss_over_rounds.png',
+        'accuracy': 'global_accuracy_over_rounds.png',
+        'precision': 'global_precision_over_rounds.png',
+        'recall': 'global_recall_over_rounds.png'
+    }
+
+    # Ensure 'round' key exists before proceeding
+    if 'round' not in history_fl or not history_fl['round']:
+        print("No rounds data available for plotting global metrics.")
+        return
+
+    rounds = history_fl['round']
+
+    for metric in metrics:
+        if metric in history_fl:
+            plt.figure(figsize=(10, 6))
+            plt.plot(rounds, history_fl[metric], marker='o', linestyle='-', color='skyblue')
+            plt.title(titles[metric])
+            plt.xlabel('Federated Learning Round')
+            plt.ylabel(metric.capitalize())
+            plt.grid(True)
+            plt.tight_layout()
+            plt.savefig(os.path.join(results_dir, filenames[metric]))
+            plt.close()
+            print(f"Saved plot: {os.path.join(results_dir, filenames[metric])}")
+        else:
+            print(f"Metric '{metric}' not found in history_fl. Skipping plot for this metric.")
 
 def main():
     # Make sure the results directory exists
     if not os.path.exists(RESULTS_DIR):
         os.makedirs(RESULTS_DIR)
-    
-    # Load centralized model metrics for comparison
-    load_centralized_model_metrics()
     
     # Get the number of input features for the model
     num_features = get_model_input_features()
@@ -180,32 +319,25 @@ def main():
         min_evaluate_clients=MIN_EVALUATE_CLIENTS,
         min_available_clients=MIN_AVAILABLE_CLIENTS,
         evaluate_fn=get_evaluate_fn(FraudDetectionNet, num_features),
-        on_fit_config_fn=lambda rnd: {"epoch": 5, "batch_size": 32},  # 5 epochs per round as per requirements
+        on_evaluate_config_fn=lambda rnd: {"round_num": rnd},  # ← this was missing
+        on_fit_config_fn=lambda rnd: {
+        "epoch": 5,
+        "batch_size": 32,
+        "round_num": rnd  
+    },
     )
     
     # Start the Flower server
     fl.server.start_server(
-        server_address="0.0.0.0:3000",  # Changed from 8080 to 3000
+        server_address="0.0.0.0:3000",
         config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
         strategy=strategy,
     )
-    
+    print("Federated Learning training complete. Plotting global metrics...")
+    plot_global_metrics(history_fl, RESULTS_DIR)
     print(f"Federated Learning completed after {NUM_ROUNDS} rounds.")
     print(f"Final global model saved at: {GLOBAL_MODEL_PATH}")
     print(f"Evaluation results saved at: {RESULTS_DIR}")
 
 if __name__ == "__main__":
     main()
-# In the main function, add this comment before defining the strategy:
-
-# TODO: Implement encryption for secure aggregation
-# This would involve using homomorphic encryption or secure multi-party computation
-# to allow the server to aggregate model updates without seeing the actual values
-# At the top of the file, add these imports and configurations
-import warnings
-import logging
-import os
-
-# Suppress warnings
-warnings.filterwarnings('ignore')
-logging.getLogger('flwr').setLevel(logging.ERROR)

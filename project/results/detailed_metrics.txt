@@ -1,0 +1,27 @@
+===============================================
+Federated Learning vs. Centralized Comparison
+===============================================
+
+1. CLASSIFICATION METRICS
+------------------------
+AUC          | FL: 0.997009 | Centralized: 0.997424 | Diff: -0.000414
+F1           | FL: 0.981352 | Centralized: 0.971765 | Diff: 0.009587
+PRECISION    | FL: 0.997630 | Centralized: 0.997585 | Diff: 0.000046
+RECALL       | FL: 0.965596 | Centralized: 0.947248 | Diff: 0.018349
+ACCURACY     | FL: 0.991874 | Centralized: 0.987811 | Diff: 0.004063
+
+2. TRAINING EFFICIENCY
+---------------------
+Loss              | FL: 0.100441 | Centralized: 0.049519
+
+3. PRIVACY ANALYSIS
+------------------
+Privacy Budget (ε): Not formally tracked in current implementation
+Noise Scale: 0.01 (fixed in current implementation)
+Clipping Threshold: 1.0 (fixed in current implementation)
+
+4. SYSTEM PERFORMANCE
+--------------------
+Communication Rounds: 10
+Clients: 3
+Aggregation Strategy: FedAvg

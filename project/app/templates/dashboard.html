@@ -52,9 +52,9 @@
                                             </div>
                                             <div class="card-body">
                                                 <p><strong>Fraud Ratio:</strong> <span class="fraud-ratio">{{ "%.2f"|format(status.fraud_ratio * 100) }}%</span></p>
-                                                <p><strong>Samples:</strong> <span class="samples">{{ status.samples }}</span></p>
-                                                <p><strong>Accuracy:</strong> <span class="accuracy">{{ "%.2f"|format(status.accuracy * 100) }}%</span></p>
-                                                <p><strong>Last Update:</strong> <span class="last-update">{{ status.last_update or 'Never' }}</span></p>
+                                                <!-- <p><strong>Samples:</strong> <span class="samples">{{ status.samples }}</span></p> -->
+                                                <!-- <p><strong>Accuracy:</strong> <span class="accuracy">{{ "%.2f"|format(status.accuracy * 100) }}%</span></p> -->
+                                                <!-- <p><strong>Last Update:</strong> <span class="last-update">{{ status.last_update or 'Never' }}</span></p> -->
                                             </div>
                                         </div>
                                     </div>
@@ -82,9 +82,9 @@
             </div>
         </div>
 
-        <div class="row">
+        <!-- <div class="row">
             <!-- Performance Chart -->
-            <div class="col-md-8">
+            <!-- <div class="col-md-8">
                 <div class="card mb-4">
                     <div class="card-header bg-info text-white">
                         <h5 class="card-title mb-0">Model Performance</h5>
@@ -92,10 +92,10 @@
                     <div class="card-body">
                         <div id="performance-chart" style="height: 400px;"></div>
                     </div>
-                </div>
-            </div>
+                </div> -->
+            <!-- </div> --> -->
             
-            <!-- Fraud Prediction Form -->
+            <!-- Fraud Prediction Form
             <div class="col-md-4">
                 <div class="card mb-4">
                     <div class="card-header bg-warning">
@@ -128,7 +128,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         
         <!-- Recent Transactions -->
         <div class="row">

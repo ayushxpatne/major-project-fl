@@ -51,21 +51,21 @@ CLIENT3_PID=$!
 # Wait for clients to initialize
 sleep 2
 
-# Launch Flask dashboard (uncomment if you want to use it)
-# echo "Starting Flask dashboard..."
-# $PYTHON app/app.py
+Launch Flask dashboard (uncomment if you want to use it)
+echo "Starting Flask dashboard..."
+$PYTHON app/app.py
 
-# Cleanup function
-cleanup() {
-    echo "Shutting down..."
-    kill $SERVER_PID $CLIENT1_PID $CLIENT2_PID $CLIENT3_PID
-    # Deactivate virtual environment
-    deactivate
-    exit 0
-}
+# # Cleanup function
+# cleanup() {
+#     echo "Shutting down..."
+#     kill $SERVER_PID $CLIENT1_PID $CLIENT2_PID $CLIENT3_PID
+#     # Deactivate virtual environment
+#     deactivate
+#     exit 0
+# }
 
 # Set up trap for cleanup
-trap cleanup INT TERM
+# trap cleanup INT TERM
 
 # Keep the script running until interrupted
 wait

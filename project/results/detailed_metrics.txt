@@ -4,15 +4,15 @@ Federated Learning vs. Centralized Comparison
 
 1. CLASSIFICATION METRICS
 ------------------------
-AUC          | FL: 0.997009 | Centralized: 0.997424 | Diff: -0.000414
-F1           | FL: 0.981352 | Centralized: 0.971765 | Diff: 0.009587
-PRECISION    | FL: 0.997630 | Centralized: 0.997585 | Diff: 0.000046
-RECALL       | FL: 0.965596 | Centralized: 0.947248 | Diff: 0.018349
-ACCURACY     | FL: 0.991874 | Centralized: 0.987811 | Diff: 0.004063
+AUC          | FL: 0.997356 | Centralized: 0.997424 | Diff: -0.000067
+F1           | FL: 0.987254 | Centralized: 0.971765 | Diff: 0.015489
+PRECISION    | FL: 0.997658 | Centralized: 0.997585 | Diff: 0.000074
+RECALL       | FL: 0.977064 | Centralized: 0.947248 | Diff: 0.029817
+ACCURACY     | FL: 0.994413 | Centralized: 0.987811 | Diff: 0.006602
 
 2. TRAINING EFFICIENCY
 ---------------------
-Loss              | FL: 0.100441 | Centralized: 0.049519
+Loss              | FL: 0.063522 | Centralized: 0.049519
 
 3. PRIVACY ANALYSIS
 ------------------
